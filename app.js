@@ -7,8 +7,8 @@ import { showNotification, updateTabTitle } from './notifications.js';
 const CHECK_INTERVAL = 300000; // Check every 5 minutes
 const ORIGINAL_TITLE = 'RSS Update Notifier';
 
-let feeds = getFeeds();
-let updates = getUpdates();
+let feeds = getFeeds() || []; // Ensure feeds is initialized as an array
+let updates = getUpdates() || []; // Ensure updates is initialized as an array
 
 function addFeed() {
     const rssUrl = document.getElementById('rssUrl').value.trim();
