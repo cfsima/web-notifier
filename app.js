@@ -7,8 +7,8 @@ import { showNotification, updateTabTitle } from './notifications.js';
 const CHECK_INTERVAL = 300000; // Check every 5 minutes
 const ORIGINAL_TITLE = 'RSS Update Notifier';
 
-let feeds = getFeeds() || []; // Ensure feeds is initialized as an array
-let updates = getUpdates() || []; // Ensure updates is initialized as an array
+let feeds = getFeeds();
+let updates = getUpdates();
 
 function addFeed() {
     const rssUrl = document.getElementById('rssUrl').value.trim();
@@ -25,6 +25,23 @@ function addFeed() {
     }
 }
 
+function clearSite() {
+    // Clear localStorage
+    localStorage.removeItem('feeds');
+    localStorage.removeItem('updates');
+
+    // Reset variables
+    feeds = [];
+    updates = [];
+
+    // Clear UI
+    document.getElementById('feeds').innerHTML = '';
+    document.getElementById('updateList').innerHTML = '';
+    document.title = ORIGINAL_TITLE;
+
+    // Optionally reload the page
+    location.reload();
+}
 function removeFeed(feed) {
     feeds = feeds.filter(f => f !== feed);
     saveFeeds(feeds);
@@ -67,3 +84,4 @@ window.onload = () => {
 };
 
 window.addFeed = addFeed; // Expose to global scope for button onclick
+window.clearSite = clearSite; // Expose to global scope for button onclick

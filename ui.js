@@ -1,10 +1,23 @@
 // ui.js
 export function renderFeeds(feeds, removeFeedCallback) {
     const feedList = document.getElementById('feeds');
-    feedList.innerHTML = feeds.map(feed =>
-        `<li>${feed} <button onclick="(${removeFeedCallback})('${feed}')" class="text-red-500">Remove</button></li>`
-    ).join('');
+    feedList.innerHTML = ''; // Clear the list first
+
+    feeds.forEach(feed => {
+        const listItem = document.createElement('li');
+        listItem.textContent = feed;
+
+        const removeButton = document.createElement('button');
+        removeButton.textContent = '  Remove';
+        removeButton.className = 'text-red-500';
+        removeButton.addEventListener('click', () => removeFeedCallback(feed));
+
+        listItem.appendChild(removeButton);
+        feedList.appendChild(listItem);
+    });
 }
+
+
 
 export function renderUpdates(updates) {
     const updateList = updates
