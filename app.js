@@ -1,5 +1,5 @@
 // app.js
-import { getFeeds, saveFeeds, getUpdates, saveUpdates } from './storage.js';
+import { getFeeds, saveFeeds, getUpdates, saveUpdates, getTheme, saveTheme } from './storage.js';
 import { fetchRSS } from './rss.js';
 import { renderFeeds, renderUpdates } from './ui.js';
 import { showNotification, updateTabTitle } from './notifications.js';
@@ -79,7 +79,29 @@ function markUpdatesAsRead() {
     updateTabTitle(updates, ORIGINAL_TITLE);
 }
 
+function initTheme() {
+    const savedTheme = getTheme();
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+}
+
+function toggleTheme() {
+    const html = document.documentElement;
+    if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        saveTheme('light');
+    } else {
+        html.classList.add('dark');
+        saveTheme('dark');
+    }
+}
+
 window.onload = () => {
+    initTheme();
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
     renderFeeds(feeds, removeFeed);
     renderUpdates(updates);
     updateTabTitle(updates, ORIGINAL_TITLE);
