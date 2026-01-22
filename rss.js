@@ -54,9 +54,9 @@ export async function fetchRSS(url) {
         let response = await fetch(`${PROXY_URL}${encodeURIComponent(url)}`);
 
         // If local proxy not found (e.g. running locally without netlify dev, which returns 404 for unknown routes),
-        // fall back to the public proxy.
-        if (!response.ok && response.status === 404) {
-             console.warn('Local proxy not found (404), falling back to public proxy');
+        // OR if it fails (e.g. 500 error), fall back to the public proxy to be safe.
+        if (!response.ok) {
+             console.warn(`Local proxy issue (${response.status}), falling back to public proxy`);
              response = await fetch(`${FALLBACK_PROXY}${url}`);
         }
 

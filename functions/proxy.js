@@ -1,4 +1,4 @@
-exports.handler = async function(event, context) {
+export const handler = async function(event, context) {
   const { url } = event.queryStringParameters;
 
   if (!url) {
