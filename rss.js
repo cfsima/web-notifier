@@ -1,18 +1,71 @@
 // rss.js
-const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+const PROXY_URL = '/.netlify/functions/proxy?url=';
+const FALLBACK_PROXY = 'https://cors-anywhere.herokuapp.com/';
 
-export async function fetchRSS(url) {
-    try {
-        const response = await fetch(`${CORS_PROXY}${url}`);
-        const text = await response.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, 'text/xml');
-        const items = xml.querySelectorAll('item');
+export function parseRSS(xmlText) {
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(xmlText, 'text/xml');
+
+    // Try RSS 2.0
+    const items = xml.querySelectorAll('item');
+    if (items.length > 0) {
         return Array.from(items).map(item => ({
             title: item.querySelector('title')?.textContent || 'No title',
             link: item.querySelector('link')?.textContent || '#',
             pubDate: item.querySelector('pubDate')?.textContent || 'No date',
         }));
+    }
+
+    // Try Atom 1.0 (Reddit uses this)
+    const entries = xml.querySelectorAll('entry');
+    if (entries.length > 0) {
+        return Array.from(entries).map(entry => {
+            const title = entry.querySelector('title')?.textContent || 'No title';
+            const updated = entry.querySelector('updated')?.textContent || entry.querySelector('published')?.textContent || 'No date';
+
+            // Atom links are usually <link href="..." />
+            // Sometimes there are multiple links (self, alternate, etc). We want the one without rel or rel="alternate"
+            const links = entry.querySelectorAll('link');
+            let link = '#';
+
+            for (const l of links) {
+                const rel = l.getAttribute('rel');
+                if (!rel || rel === 'alternate') {
+                    link = l.getAttribute('href');
+                    break;
+                }
+            }
+
+            return {
+                title,
+                link,
+                pubDate: updated, // Normalize to pubDate property for UI
+            };
+        });
+    }
+
+    return [];
+}
+
+export async function fetchRSS(url) {
+    try {
+        // Try local proxy first (Serverless function)
+        // We use encodeURIComponent for the query param
+        let response = await fetch(`${PROXY_URL}${encodeURIComponent(url)}`);
+
+        // If local proxy not found (e.g. running locally without netlify dev, which returns 404 for unknown routes),
+        // fall back to the public proxy.
+        if (!response.ok && response.status === 404) {
+             console.warn('Local proxy not found (404), falling back to public proxy');
+             response = await fetch(`${FALLBACK_PROXY}${url}`);
+        }
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch RSS: ${response.status} ${response.statusText}`);
+        }
+
+        const text = await response.text();
+        return parseRSS(text);
     } catch (error) {
         console.error('Error fetching RSS:', error);
         return [];
