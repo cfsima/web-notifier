@@ -12,8 +12,11 @@ const fixturesDir = path.join(process.cwd(), 'tests', 'fixtures');
 function testStandardRSS() {
     console.log('Testing Standard RSS...');
     const xml = fs.readFileSync(path.join(fixturesDir, 'standard-rss.xml'), 'utf-8');
-    const items = parseRSS(xml);
+    const result = parseRSS(xml);
 
+    if (result.siteTitle !== 'Example RSS') throw new Error(`Expected siteTitle 'Example RSS', got '${result.siteTitle}'`);
+
+    const items = result.items;
     if (items.length !== 1) throw new Error(`Expected 1 item, got ${items.length}`);
     if (items[0].title !== 'Example Item') throw new Error(`Expected title 'Example Item', got '${items[0].title}'`);
     if (items[0].link !== 'https://example.com/item/1') throw new Error(`Expected link 'https://example.com/item/1', got '${items[0].link}'`);
@@ -24,8 +27,11 @@ function testStandardRSS() {
 function testRedditAtom() {
     console.log('Testing Reddit Atom...');
     const xml = fs.readFileSync(path.join(fixturesDir, 'reddit-atom.xml'), 'utf-8');
-    const items = parseRSS(xml);
+    const result = parseRSS(xml);
 
+    if (result.siteTitle !== 'Reddit - r/javascript') throw new Error(`Expected siteTitle 'Reddit - r/javascript', got '${result.siteTitle}'`);
+
+    const items = result.items;
     if (items.length !== 1) throw new Error(`Expected 1 item, got ${items.length}`);
     if (items[0].title !== 'Test Thread Title') throw new Error(`Expected title 'Test Thread Title', got '${items[0].title}'`);
 
