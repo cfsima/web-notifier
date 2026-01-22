@@ -11,13 +11,8 @@ let feeds = getFeeds();
 let updates = getUpdates();
 
 function addFeed() {
-    let rssUrl = document.getElementById('rssUrl').value.trim();
+    const rssUrl = document.getElementById('rssUrl').value.trim();
     if (!rssUrl) return alert('Please enter a valid RSS URL');
-
-    // Auto-convert Reddit thread URLs to RSS
-    if (rssUrl.includes('reddit.com') && rssUrl.includes('/comments/') && !rssUrl.endsWith('.rss')) {
-        rssUrl = rssUrl.replace(/\/$/, '') + '.rss';
-    }
 
     if (!feeds.includes(rssUrl)) {
         feeds.push(rssUrl);

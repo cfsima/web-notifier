@@ -1,97 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+    <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RSS Update Notifier</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
-    <link rel="stylesheet" href="custom.css">
+<script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="custom.css">
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 font-sans text-gray-900 dark:text-gray-100 transition-colors duration-300">
-<div class="container mx-auto p-4 max-w-3xl">
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">RSS Notifier</h1>
-        <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" aria-label="Toggle Dark Mode">
-            <!-- Sun Icon (for Dark Mode) -->
-            <svg id="sunIcon" class="w-6 h-6 hidden text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            <!-- Moon Icon (for Light Mode) -->
-            <svg id="moonIcon" class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 24.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-        </button>
-    </div>
+<body class="bg-gray-100 font-sans">
+<div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-4">RSS Update Notifier</h1>
 
     <!-- Form to add RSS feed -->
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Add RSS Feed</h2>
-        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+    <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-2">Add RSS Feed</h2>
+        <div class="flex space-x-2">
             <label for="rssUrl" class="sr-only">RSS Feed URL</label>
-            <input id="rssUrl" type="text" placeholder="Enter RSS feed URL or Reddit thread link..." class="flex-grow p-3 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-shadow">
-            <button onclick="addFeed()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded transition-colors duration-200 shadow-md">Add Feed</button>
+            <input id="rssUrl" type="text" placeholder="Enter RSS feed URL" class="flex-grow p-2 border rounded">
+                <button onclick="addFeed()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add</button>
         </div>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Pro tip: Paste a Reddit thread URL to track comments automatically.</p>
     </div>
 
     <!-- Feed list and updates -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- Subscribed Feeds (Sidebar on desktop) -->
-        <div id="feedList" class="md:col-span-1">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200 flex items-center justify-between">
-                <span>Subscriptions</span>
-                <button onclick="clearSite()" class="text-xs text-red-500 hover:text-red-600 hover:underline">Reset All</button>
-            </h2>
-            <ul id="feeds" class="space-y-2"></ul>
-        </div>
+    <div id="feedList" class="mb-6">
+        <h2 class="text-xl font-semibold mb-2">Subscribed Feeds</h2>
+        <ul id="feeds" class="list-disc pl-5"></ul>
+    </div>
 
-        <!-- Recent Updates (Main Content) -->
-        <div id="updates" class="md:col-span-2">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Recent Updates</h2>
-            <ul id="updateList" class="space-y-4"></ul>
-        </div>
+    <div id="updates" class="mb-6">
+        <h2 class="text-xl font-semibold mb-2">Recent Updates</h2>
+        <ul id="updateList" class="space-y-2"></ul>
     </div>
 
     <!-- Notification area -->
-    <div id="notification" class="fixed bottom-6 right-6 bg-blue-600 text-white px-6 py-4 rounded-lg shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-3">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-        <span class="font-medium">New updates available!</span>
+    <div id="notification" class="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded shadow-lg hidden">
+        New updates available!
     </div>
 </div>
-
+<p><button onclick="clearSite()" class="text-blue-500">Reset</button></p>
 <script type="module" src="app.js"></script>
-<script>
-    // Theme Toggle Logic
-    const themeToggle = document.getElementById('themeToggle');
-    const sunIcon = document.getElementById('sunIcon');
-    const moonIcon = document.getElementById('moonIcon');
-    const html = document.documentElement;
 
-    function applyTheme(isDark) {
-        if (isDark) {
-            html.classList.add('dark');
-            sunIcon.classList.remove('hidden');
-            moonIcon.classList.add('hidden');
-        } else {
-            html.classList.remove('dark');
-            sunIcon.classList.add('hidden');
-            moonIcon.classList.remove('hidden');
-        }
-    }
-
-    // Check saved preference or system preference
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    let isDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
-
-    applyTheme(isDark);
-
-    themeToggle.addEventListener('click', () => {
-        isDark = !isDark;
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        applyTheme(isDark);
-    });
-</script>
 </body>
 </html>
