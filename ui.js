@@ -9,7 +9,7 @@ export function renderFeeds(feeds, removeFeedCallback) {
 
         const removeButton = document.createElement('button');
         removeButton.textContent = '  Remove';
-        removeButton.className = 'text-red-500';
+        removeButton.className = 'text-red-500 dark:text-red-400 ml-2';
         removeButton.addEventListener('click', () => removeFeedCallback(feed));
 
         listItem.appendChild(removeButton);
@@ -25,6 +25,6 @@ export function renderUpdates(updates) {
         .slice(0, 50); // Limit to 50 updates
     document.getElementById('updateList').innerHTML = updateList
         .map(update =>
-            `<li><a href="${update.link}" target="_blank" class="text-blue-500">${update.title}</a> from ${update.feed} (${new Date(update.pubDate).toLocaleString()})${update.unread ? ' <span class="text-red-500">[New]</span>' : ''}</li>`
+            `<li><a href="${update.link}" target="_blank" class="text-blue-500 dark:text-blue-400 hover:underline">${update.title}</a> from ${update.feed} (${new Date(update.pubDate).toLocaleString()})${update.unread ? ' <span class="text-red-500 dark:text-red-400 font-bold">[New]</span>' : ''}</li>`
         ).join('');
 }
