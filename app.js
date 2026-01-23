@@ -56,10 +56,10 @@ function removeFeed(feed) {
 async function checkForUpdates() {
     let newUpdates = false;
     for (const feed of feeds) {
-        const items = await fetchRSS(feed);
+        const { siteTitle, items } = await fetchRSS(feed);
         items.forEach(item => {
             if (!updates.some(u => u.link === item.link && u.feed === feed)) {
-                updates.push({ ...item, feed, timestamp: new Date().toISOString(), unread: true });
+                updates.push({ ...item, feed, feedTitle: siteTitle, timestamp: new Date().toISOString(), unread: true });
                 newUpdates = true;
             }
         });
