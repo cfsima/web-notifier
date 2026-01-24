@@ -35,61 +35,67 @@ async function runTests() {
         await fetchRSS('http://example.com/feed');
         console.log('✅ Passed');
 
-        console.log('\n--- Test 2: Primary 404 -> Fallback (Current Behavior) ---');
-        let fallbackCalled = false;
+        console.log('\n--- Test 2: Primary 404 -> Community (Success) ---');
+        let communityCalled = false;
         global.fetch = async (url) => {
             if (url.includes('.netlify/functions/proxy')) {
                 return { ok: false, status: 404, statusText: 'Not Found' };
             }
-            if (url.includes('cors-anywhere')) {
-                fallbackCalled = true;
+            if (url.includes('cors-anywhere.com') && !url.includes('herokuapp')) {
+                communityCalled = true;
                 return {
                     ok: true,
                     status: 200,
-                    text: async () => '<rss><channel><title>Fallback</title></channel></rss>'
+                    text: async () => '<rss><channel><title>Community</title></channel></rss>'
                 };
+            }
+             if (url.includes('cors-anywhere.herokuapp.com')) {
+                throw new Error('Should not have reached Heroku proxy');
             }
             return { ok: false, status: 500 };
         };
         await fetchRSS('http://example.com/feed');
-        if (!fallbackCalled) throw new Error('Fallback URL was not called on 404');
+        if (!communityCalled) throw new Error('Community proxy was not called on 404');
         console.log('✅ Passed');
 
-        console.log('\n--- Test 3: Primary 500 -> Fallback (New Requirement) ---');
-        fallbackCalled = false;
+        console.log('\n--- Test 3: Primary 500 -> Community 500 -> Heroku (Success) ---');
+        let herokuCalled = false;
+        let communityCalledBeforeHeroku = false;
         global.fetch = async (url) => {
             if (url.includes('.netlify/functions/proxy')) {
                 return { ok: false, status: 500, statusText: 'Server Error' };
             }
-            if (url.includes('cors-anywhere')) {
-                fallbackCalled = true;
+            if (url.includes('cors-anywhere.com') && !url.includes('herokuapp')) {
+                communityCalledBeforeHeroku = true;
+                return { ok: false, status: 500, statusText: 'Community Error' };
+            }
+            if (url.includes('cors-anywhere.herokuapp.com')) {
+                if (!communityCalledBeforeHeroku) throw new Error('Skipped community proxy!');
+                herokuCalled = true;
                 return {
                     ok: true,
                     status: 200,
-                    text: async () => '<rss><channel><title>Fallback</title></channel></rss>'
+                    text: async () => '<rss><channel><title>Heroku</title></channel></rss>'
                 };
             }
             return { ok: false, status: 500 };
         };
 
-        try {
-            await fetchRSS('http://example.com/feed');
-            if (!fallbackCalled) {
-                 throw new Error('Fallback NOT called on 500');
-            } else {
-                 console.log('✅ Passed');
-            }
-        } catch (e) {
-            console.error('❌ Failed:', e.message);
-            passed = false;
+        await fetchRSS('http://example.com/feed');
+        if (!herokuCalled) {
+             throw new Error('Heroku proxy NOT called after both failures');
         }
+        console.log('✅ Passed');
 
     } catch (e) {
         console.error('❌ Test Suite Failed:', e);
         passed = false;
+        process.exit(1);
     } finally {
         global.fetch = originalFetch;
     }
+
+    if (!passed) process.exit(1);
 }
 
 runTests();
