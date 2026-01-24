@@ -1,6 +1,7 @@
 // rss.js
 const PROXY_URL = '/.netlify/functions/proxy?url=';
-const FALLBACK_PROXY = 'https://cors-anywhere.herokuapp.com/';
+const FALLBACK_PROXY_COMMUNITY = 'https://cors-anywhere.com/';
+const FALLBACK_PROXY_HEROKU = 'https://cors-anywhere.herokuapp.com/';
 
 export function parseRSS(xmlText) {
     const parser = new DOMParser();
@@ -65,15 +66,19 @@ export function parseRSS(xmlText) {
 
 export async function fetchRSS(url) {
     try {
-        // Try local proxy first (Serverless function)
-        // We use encodeURIComponent for the query param
+        // 1. Try local proxy first (Serverless function)
         let response = await fetch(`${PROXY_URL}${encodeURIComponent(url)}`);
 
-        // If local proxy fails (e.g. 404 not found, or 500 server error),
-        // fall back to the public proxy.
+        // 2. If local proxy fails, try community proxy
         if (!response.ok) {
-             console.warn(`Local proxy failed (${response.status} ${response.statusText}), falling back to public proxy`);
-             response = await fetch(`${FALLBACK_PROXY}${url}`);
+             console.warn(`Local proxy failed (${response.status} ${response.statusText}), trying community proxy...`);
+             response = await fetch(`${FALLBACK_PROXY_COMMUNITY}${url}`);
+        }
+
+        // 3. If community proxy fails, try Heroku proxy
+        if (!response.ok) {
+             console.warn(`Community proxy failed (${response.status} ${response.statusText}), trying Heroku proxy...`);
+             response = await fetch(`${FALLBACK_PROXY_HEROKU}${url}`);
         }
 
         if (!response.ok) {
