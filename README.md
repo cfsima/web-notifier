@@ -1,1 +1,1 @@
-Simple notifier page showing updates from rss-feeds.
+Simple notifier [page](https://cfsima.github.io/web-notifier/) showing updates from rss-feeds.
